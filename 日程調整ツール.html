@@ -1,0 +1,375 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+.wrap{padding:1.5rem 0}
+.step-nav{display:flex;gap:0;margin-bottom:2rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.step-btn{flex:1;padding:10px 4px;background:var(--color-background-primary);border:none;border-right:0.5px solid var(--color-border-tertiary);font-size:12px;cursor:pointer;color:var(--color-text-secondary);line-height:1.4;text-align:center}
+.step-btn:last-child{border-right:none}
+.step-btn.active{background:var(--color-background-info);color:var(--color-text-info);font-weight:500}
+.step-btn.done{background:var(--color-background-success);color:var(--color-text-success)}
+.page{display:none}.page.active{display:block}
+h3{font-size:16px;font-weight:500;margin-bottom:1rem}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+input[type=text],input[type=date],select{width:100%;margin-bottom:8px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.row input{flex:1;margin-bottom:0}
+.btn-add{font-size:12px;color:var(--color-text-info);background:none;border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:5px 10px;cursor:pointer;margin-top:4px}
+.btn-rm{background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+.btn-primary{background:var(--color-background-info);color:var(--color-text-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:9px 20px;font-size:14px;cursor:pointer;margin-top:8px}
+.btn-success{background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-md);padding:9px 20px;font-size:14px;cursor:pointer;margin-top:8px}
+.matrix-wrap{overflow-x:auto;margin-bottom:1rem}
+table{border-collapse:collapse;font-size:12px;min-width:100%}
+th{background:var(--color-background-secondary);padding:6px 8px;border:0.5px solid var(--color-border-tertiary);font-weight:500;white-space:nowrap;text-align:center}
+th.row-header{text-align:left;min-width:90px}
+td{padding:4px 6px;border:0.5px solid var(--color-border-tertiary);text-align:center;vertical-align:middle}
+td.row-label{text-align:left;font-weight:500;font-size:12px;white-space:nowrap;padding-left:8px;color:var(--color-text-primary)}
+input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--color-text-info)}
+.all-check{font-size:11px;color:var(--color-text-info);cursor:pointer;text-decoration:underline;display:block;margin-bottom:4px}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);margin-left:6px}
+.badge-ok{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-wait{background:var(--color-background-warning);color:var(--color-text-warning)}
+.match-cell{background:var(--color-background-success);font-weight:500}
+.match-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--color-text-success)}
+.confirm-cell{background:#E6F1FB}
+.section-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;margin-top:1rem}
+.company-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);margin:2px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.company-tag.selected{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.result-block{background:var(--color-background-success);border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:8px}
+.result-title{font-weight:500;font-size:14px;color:var(--color-text-success);margin-bottom:4px}
+.slot-chip{display:inline-block;background:var(--color-background-primary);border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-md);padding:3px 10px;font-size:12px;margin:2px;color:var(--color-text-primary)}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:1.5rem 0}
+</style>
+
+<div class="wrap">
+<div class="step-nav">
+  <button class="step-btn active" onclick="goStep(0)">① 設定<br><span style="font-size:10px">事務局</span></button>
+  <button class="step-btn" onclick="goStep(1)">② 学生<br><span style="font-size:10px">回答</span></button>
+  <button class="step-btn" onclick="goStep(2)">③ 確認<br><span style="font-size:10px">事務局</span></button>
+  <button class="step-btn" onclick="goStep(3)">④ 企業<br><span style="font-size:10px">回答</span></button>
+  <button class="step-btn" onclick="goStep(4)">⑤ 確定<br><span style="font-size:10px">事務局</span></button>
+</div>
+
+<div id="page0" class="page active">
+  <h3>候補日程・学生・企業の設定</h3>
+  <div class="card">
+    <label>面談候補日（開始日・終了日）</label>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="date" id="start-date" style="flex:1;margin-bottom:0">
+      <span style="color:var(--color-text-secondary)">〜</span>
+      <input type="date" id="end-date" style="flex:1;margin-bottom:0">
+    </div>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin-top:4px">時間帯：9:00〜17:00（1時間単位）で自動生成されます</p>
+  </div>
+  <div class="card">
+    <label>学生一覧</label>
+    <div id="students-list">
+      <div class="row"><input type="text" placeholder="学生名" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button></div>
+      <div class="row"><input type="text" placeholder="学生名" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button></div>
+    </div>
+    <button class="btn-add" onclick="addRow('students-list','学生名')">+ 学生を追加</button>
+  </div>
+  <div class="card">
+    <label>企業一覧</label>
+    <div id="companies-list">
+      <div class="row"><input type="text" placeholder="企業名" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button></div>
+      <div class="row"><input type="text" placeholder="企業名" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button></div>
+      <div class="row"><input type="text" placeholder="企業名" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button></div>
+    </div>
+    <button class="btn-add" onclick="addRow('companies-list','企業名')">+ 企業を追加</button>
+  </div>
+  <div class="card" id="assign-card" style="display:none">
+    <label>学生と企業の紐づけ（学生ごとに面談企業を選択）</label>
+    <div id="assign-area"></div>
+  </div>
+  <button class="btn-add" style="margin-bottom:8px" onclick="buildAssign()">紐づけを設定する</button>
+  <br>
+  <button class="btn-primary" onclick="finishSetup()">設定を完了して次へ →</button>
+</div>
+
+<div id="page1" class="page">
+  <h3>学生回答</h3>
+  <div class="card">
+    <label>回答する学生を選択</label>
+    <select id="student-select" onchange="renderStudentMatrix()"></select>
+  </div>
+  <div id="student-matrix-area"></div>
+  <button class="btn-primary" onclick="saveStudentAnswer()">回答を保存 →</button>
+</div>
+
+<div id="page2" class="page">
+  <h3>学生回答の確認・企業別展開</h3>
+  <div id="admin-overview"></div>
+  <button class="btn-primary" onclick="goStep(3)">企業回答ステップへ →</button>
+</div>
+
+<div id="page3" class="page">
+  <h3>企業回答</h3>
+  <div class="card">
+    <label>回答する企業を選択</label>
+    <select id="company-select" onchange="renderCompanyMatrix()"></select>
+  </div>
+  <div id="company-matrix-area"></div>
+  <button class="btn-primary" onclick="saveCompanyAnswer()">回答を保存 →</button>
+</div>
+
+<div id="page4" class="page">
+  <h3>マッチング結果・日程確定</h3>
+  <div id="match-area"></div>
+</div>
+</div>
+
+<script>
+var S = {
+  dates:[],slots:[],students:[],companies:[],assign:{},
+  studentVotes:{},companyVotes:{},confirmed:{}
+};
+
+function goStep(n){
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.step-btn').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i===n) b.classList.add('active');
+    else if(i<n) b.classList.add('done');
+  });
+  if(n===2) renderAdminOverview();
+  if(n===4) renderMatches();
+}
+
+function addRow(listId, ph){
+  var el=document.createElement('div');el.className='row';
+  el.innerHTML='<input type="text" placeholder="'+ph+'" style="margin-bottom:0"><button class="btn-rm" onclick="rmRow(this)">×</button>';
+  document.getElementById(listId).appendChild(el);
+}
+function rmRow(btn){btn.parentElement.remove()}
+
+function buildAssign(){
+  var students=[...document.querySelectorAll('#students-list input')].map(i=>i.value).filter(v=>v.trim());
+  var companies=[...document.querySelectorAll('#companies-list input')].map(i=>i.value).filter(v=>v.trim());
+  if(!students.length||!companies.length){alert('学生と企業を入力してください');return}
+  var area=document.getElementById('assign-area');
+  area.innerHTML='';
+  students.forEach(s=>{
+    var div=document.createElement('div');div.style.marginBottom='12px';
+    div.innerHTML='<div style="font-weight:500;font-size:13px;margin-bottom:4px">'+s+'</div>';
+    companies.forEach(c=>{
+      var tag=document.createElement('span');tag.className='company-tag';tag.textContent=c;
+      tag.dataset.student=s;tag.dataset.company=c;
+      tag.onclick=function(){this.classList.toggle('selected')};
+      div.appendChild(tag);
+    });
+    area.appendChild(div);
+  });
+  document.getElementById('assign-card').style.display='block';
+}
+
+function finishSetup(){
+  var startVal=document.getElementById('start-date').value;
+  var endVal=document.getElementById('end-date').value;
+  if(!startVal||!endVal){alert('日付を入力してください');return}
+  var students=[...document.querySelectorAll('#students-list input')].map(i=>i.value).filter(v=>v.trim());
+  var companies=[...document.querySelectorAll('#companies-list input')].map(i=>i.value).filter(v=>v.trim());
+  if(!students.length||!companies.length){alert('学生と企業を入力してください');return}
+
+  S.students=students;S.companies=companies;
+  S.dates=[];
+  var d=new Date(startVal),end=new Date(endVal);
+  while(d<=end){
+    var mm=(d.getMonth()+1),dd=d.getDate(),day=['日','月','火','水','木','金','土'][d.getDay()];
+    S.dates.push(mm+'/'+dd+'('+day+')');
+    d.setDate(d.getDate()+1);
+  }
+  S.slots=[];
+  for(var h=9;h<17;h++) S.slots.push(h+':00-'+(h+1)+':00');
+
+  S.assign={};
+  document.querySelectorAll('.company-tag.selected').forEach(t=>{
+    var st=t.dataset.student,co=t.dataset.company;
+    if(!S.assign[st]) S.assign[st]=[];
+    if(S.assign[st].indexOf(co)<0) S.assign[st].push(co);
+  });
+  students.forEach(s=>{if(!S.assign[s]) S.assign[s]=companies.slice()});
+
+  var sel=document.getElementById('student-select');
+  sel.innerHTML='';
+  students.forEach(s=>{var o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o)});
+  var csel=document.getElementById('company-select');
+  csel.innerHTML='';
+  companies.forEach(c=>{var o=document.createElement('option');o.value=c;o.textContent=c;csel.appendChild(o)});
+
+  renderStudentMatrix();
+  renderCompanyMatrix();
+  goStep(1);
+}
+
+function renderStudentMatrix(){
+  var s=document.getElementById('student-select').value;
+  var area=document.getElementById('student-matrix-area');
+  if(!S.dates.length){area.innerHTML='';return}
+  var votes=S.studentVotes[s]||{};
+  var html='<span class="all-check" onclick="checkAllStudent()">すべて選択</span>';
+  html+='<div class="matrix-wrap"><table><thead><tr><th class="row-header">日付</th>';
+  S.slots.forEach(sl=>html+='<th>'+sl+'</th>');
+  html+='</tr></thead><tbody>';
+  S.dates.forEach(dt=>{
+    html+='<tr><td class="row-label">'+dt+'</td>';
+    S.slots.forEach(sl=>{
+      var key=dt+'|'+sl;
+      var chk=votes[key]?'checked':'';
+      html+='<td><input type="checkbox" data-key="'+key+'" class="sv" '+chk+'></td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  area.innerHTML=html;
+}
+
+function checkAllStudent(){
+  document.querySelectorAll('.sv').forEach(c=>c.checked=true);
+}
+
+function saveStudentAnswer(){
+  var s=document.getElementById('student-select').value;
+  var votes={};
+  document.querySelectorAll('.sv').forEach(c=>{if(c.checked) votes[c.dataset.key]=true});
+  S.studentVotes[s]=votes;
+  alert(s+'の回答を保存しました');
+  var opts=document.getElementById('student-select').options;
+  var idx=document.getElementById('student-select').selectedIndex;
+  if(idx<opts.length-1){
+    document.getElementById('student-select').selectedIndex=idx+1;
+    renderStudentMatrix();
+  }
+}
+
+function renderAdminOverview(){
+  var html='';
+  S.students.forEach(s=>{
+    var votes=S.studentVotes[s]||{};
+    var cnt=Object.keys(votes).length;
+    html+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<span style="font-weight:500">'+s+'</span>';
+    html+=cnt>0?'<span class="badge badge-ok">回答済 '+cnt+'枠</span>':'<span class="badge badge-wait">未回答</span>';
+    html+='</div>';
+    if(cnt>0){
+      html+='<div style="margin-top:8px;font-size:12px;color:var(--color-text-secondary)">紐づき企業：'+(S.assign[s]||[]).join('、')+'</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('admin-overview').innerHTML=html;
+}
+
+function renderCompanyMatrix(){
+  var c=document.getElementById('company-select').value;
+  var area=document.getElementById('company-matrix-area');
+  if(!S.dates.length){area.innerHTML='';return}
+  var relStudents=S.students.filter(s=>(S.assign[s]||[]).indexOf(c)>=0);
+  if(!relStudents.length){area.innerHTML='<p style="color:var(--color-text-secondary);font-size:13px">この企業に紐づく学生がいません</p>';return}
+  var compVotes=S.companyVotes[c]||{};
+  var availSlots={};
+  relStudents.forEach(s=>{
+    Object.keys(S.studentVotes[s]||{}).forEach(k=>{availSlots[k]=true});
+  });
+  var html='<div class="card"><p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">学生が選択した枠のみ表示しています</p>';
+  html+='<span class="all-check" onclick="checkAllCompany()">すべて選択</span>';
+  html+='<div class="matrix-wrap"><table><thead><tr><th class="row-header">日付</th>';
+  S.slots.forEach(sl=>html+='<th>'+sl+'</th>');
+  html+='</tr></thead><tbody>';
+  var hasAny=false;
+  S.dates.forEach(dt=>{
+    var hasSomething=S.slots.some(sl=>availSlots[dt+'|'+sl]);
+    if(!hasSomething) return;
+    hasAny=true;
+    html+='<tr><td class="row-label">'+dt+'</td>';
+    S.slots.forEach(sl=>{
+      var key=dt+'|'+sl;
+      if(availSlots[key]){
+        var chk=compVotes[key]?'checked':'';
+        html+='<td><input type="checkbox" data-key="'+key+'" class="cv" '+chk+'></td>';
+      } else {
+        html+='<td style="background:var(--color-background-secondary)"></td>';
+      }
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div></div>';
+  if(!hasAny) html='<p style="color:var(--color-text-secondary);font-size:13px">まだ学生の回答がありません</p>';
+  area.innerHTML=html;
+}
+
+function checkAllCompany(){
+  document.querySelectorAll('.cv').forEach(c=>c.checked=true);
+}
+
+function saveCompanyAnswer(){
+  var c=document.getElementById('company-select').value;
+  var votes={};
+  document.querySelectorAll('.cv').forEach(cb=>{if(cb.checked) votes[cb.dataset.key]=true});
+  S.companyVotes[c]=votes;
+  alert(c+'の回答を保存しました');
+  var opts=document.getElementById('company-select').options;
+  var idx=document.getElementById('company-select').selectedIndex;
+  if(idx<opts.length-1){
+    document.getElementById('company-select').selectedIndex=idx+1;
+    renderCompanyMatrix();
+  }
+}
+
+function renderMatches(){
+  var html='';
+  S.students.forEach(s=>{
+    var companies=S.assign[s]||[];
+    var sVotes=S.studentVotes[s]||{};
+    companies.forEach(c=>{
+      var cVotes=S.companyVotes[c]||{};
+      var common=Object.keys(sVotes).filter(k=>cVotes[k]);
+      var pairKey=s+'|'+c;
+      html+='<div class="card">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      html+='<span style="font-weight:500">'+s+' × '+c+'</span>';
+      var conf=S.confirmed[pairKey];
+      if(conf) html+='<span class="badge badge-ok">確定: '+conf+'</span>';
+      html+='</div>';
+      if(common.length===0){
+        html+='<p style="font-size:12px;color:var(--color-text-secondary)">共通の候補日時がありません</p>';
+      } else {
+        html+='<div style="margin-bottom:8px">';
+        common.forEach(k=>{
+          var parts=k.split('|');
+          html+='<span class="slot-chip">'+parts[0]+' '+parts[1]+'</span>';
+        });
+        html+='</div>';
+        if(!conf){
+          html+='<select id="sel-'+pairKey.replace(/[^a-zA-Z0-9]/g,'_')+'" style="margin-bottom:8px">';
+          common.forEach(k=>{var p=k.split('|');html+='<option value="'+k+'">'+p[0]+' '+p[1]+'</option>'});
+          html+='</select>';
+          html+='<button class="btn-success" onclick="confirmSlot(\''+pairKey+'\')">この日程で確定</button>';
+        }
+      }
+      html+='</div>';
+    });
+  });
+  if(!html) html='<p style="color:var(--color-text-secondary)">まだ企業・学生の回答がありません</p>';
+  document.getElementById('match-area').innerHTML=html;
+}
+
+function confirmSlot(pairKey){
+  var selId='sel-'+pairKey.replace(/[^a-zA-Z0-9]/g,'_');
+  var sel=document.getElementById(selId);
+  if(!sel) return;
+  var parts=sel.value.split('|');
+  S.confirmed[pairKey]=parts[0]+' '+parts[1];
+  renderMatches();
+}
+
+var today=new Date();
+var yyyy=today.getFullYear();
+var mm=String(today.getMonth()+1).padStart(2,'0');
+var dd=String(today.getDate()).padStart(2,'0');
+document.getElementById('start-date').value=yyyy+'-'+mm+'-'+dd;
+var end=new Date(today);end.setDate(end.getDate()+5);
+var em=String(end.getMonth()+1).padStart(2,'0');
+var ed=String(end.getDate()).padStart(2,'0');
+document.getElementById('end-date').value=yyyy+'-'+em+'-'+ed;
+</script>
